@@ -1,0 +1,738 @@
+<title>셔클 운영이슈 월간 리포트 — 10월</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800;900&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ink: #1a222e;
+    --ink-soft: #4b5563;
+    --paper: #f2f4f4;
+    --paper-raised: #e4e8e8;
+    --paper-raised-2: #d9dedd;
+    --line: #c7cdcc;
+    --accent: #1e5f8c;
+    --accent-ink: #0f3a57;
+    --accent-soft: #dce7ee;
+    --crit: #c0392b;
+    --high: #b5651d;
+    --med: #a1801a;
+    --low: #3f7a4e;
+    --crit-soft: #f6dedb;
+    --high-soft: #f3e3d3;
+    --med-soft: #f1e8ce;
+    --low-soft: #dceadf;
+    --shadow: 0 1px 2px rgba(26,34,46,.06), 0 8px 24px -12px rgba(26,34,46,.12);
+    --radius: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e7ebec;
+      --ink-soft: #a7b0b6;
+      --paper: #11161c;
+      --paper-raised: #1a222b;
+      --paper-raised-2: #222c37;
+      --line: #2c3744;
+      --accent: #74aed6;
+      --accent-ink: #bcdcf2;
+      --accent-soft: #1c2e3b;
+      --crit: #e2756a;
+      --high: #e0a05f;
+      --med: #d4bd6b;
+      --low: #7fbd8c;
+      --crit-soft: #35211f;
+      --high-soft: #352a1c;
+      --med-soft: #332c1a;
+      --low-soft: #1d2f22;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #e7ebec;
+    --ink-soft: #a7b0b6;
+    --paper: #11161c;
+    --paper-raised: #1a222b;
+    --paper-raised-2: #222c37;
+    --line: #2c3744;
+    --accent: #74aed6;
+    --accent-ink: #bcdcf2;
+    --accent-soft: #1c2e3b;
+    --crit: #e2756a;
+    --high: #e0a05f;
+    --med: #d4bd6b;
+    --low: #7fbd8c;
+    --crit-soft: #35211f;
+    --high-soft: #352a1c;
+    --med-soft: #332c1a;
+    --low-soft: #1d2f22;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans KR", "Noto Sans KR", -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration-color: var(--line); text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .fade-in { animation: fadeIn .5s ease-out both; }
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    font-weight: 500;
+  }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- Month nav ---------- */
+  .month-nav {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 140px;
+    user-select: none;
+    z-index: 50;
+    font-family: "IBM Plex Sans KR", "Noto Sans KR", -apple-system, sans-serif;
+  }
+  .mn-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .mn-trigger:hover, .month-nav.open .mn-trigger { border-color: var(--accent); }
+  .mn-value { font-size: 12px; color: var(--ink); }
+  .mn-chevron { flex-shrink: 0; width: 8px; height: 5px; transition: transform 0.15s; }
+  .month-nav.open .mn-chevron { transform: rotate(180deg); }
+  .mn-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .month-nav.open .mn-menu { display: block; }
+  .mn-option {
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+    border-bottom: 1px solid var(--line);
+  }
+  .mn-option:last-child { border-bottom: none; }
+  .mn-option:hover { background: var(--paper-raised-2); color: var(--ink); }
+  .mn-option.selected { color: var(--ink); font-weight: 600; }
+
+  /* ---------- Header ---------- */
+  header.hero {
+    padding: 64px 0 40px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  header.hero .eyebrow { display: block; margin-bottom: 14px; }
+  h1 {
+    font-family: "Gothic A1", "IBM Plex Sans KR", sans-serif;
+    font-weight: 900;
+    font-size: clamp(1.9rem, 4.4vw, 2.65rem);
+    line-height: 1.18;
+    letter-spacing: -.01em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .hero-sub {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    margin: 0;
+  }
+  .hero-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: 26px;
+    font-size: .88rem;
+    color: var(--ink-soft);
+  }
+  .hero-meta b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- KPI strip ---------- */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 36px 0 0;
+  }
+  .kpi {
+    background: var(--paper-raised);
+    padding: 20px 18px;
+  }
+  .kpi .num {
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi .num span { font-size: 1.05rem; color: var(--ink-soft); font-weight: 600; }
+  .kpi .label { margin-top: 6px; font-size: .82rem; color: var(--ink-soft); }
+  .kpi .sub { margin-top: 10px; font-size: .78rem; color: var(--ink-soft); }
+  .sev-bar { display: flex; height: 6px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+  .sev-bar i { display: block; }
+
+  @media (max-width: 680px) {
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ---------- Section scaffolding ---------- */
+  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+  .section-head { margin-bottom: 28px; }
+  .section-head .eyebrow { margin-bottom: 10px; }
+  h2 {
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -.005em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  .section-dek { color: var(--ink-soft); max-width: 64ch; margin: 0; font-size: .97rem; }
+
+  /* ---------- Taxonomy bars ---------- */
+  .tax-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 72px;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid var(--line);
+  }
+  .tax-row:first-of-type { border-top: none; }
+  .tax-name { font-weight: 600; font-size: .94rem; }
+  .tax-track { background: var(--paper-raised); border-radius: 6px; height: 14px; overflow: hidden; }
+  .tax-fill { height: 100%; background: var(--accent); border-radius: 6px 0 0 6px; }
+  .tax-count { text-align: right; font-size: .92rem; color: var(--ink-soft); }
+  .tax-count b { color: var(--ink); }
+  .tax-chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .74rem;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: var(--paper-raised);
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    text-decoration: none;
+    transition: border-color .15s, color .15s;
+  }
+  a.chip:hover, a.chip:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  td.num a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  td.num a:hover, td.num a:focus-visible {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  /* ---------- Callout ---------- */
+  .callout {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 18px 22px;
+    margin-top: 28px;
+  }
+  .callout .eyebrow { color: var(--accent-ink); }
+  .callout p { margin: 8px 0 0; color: var(--ink); font-size: .96rem; }
+  .callout p + p { margin-top: 8px; }
+
+  /* ---------- Patterns (route) ---------- */
+  .route {
+    position: relative;
+    padding-left: 28px;
+    border-left: 2px dashed var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .pattern { position: relative; }
+  .pattern::before {
+    content: "";
+    position: absolute;
+    left: -34px;
+    top: 4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2.5px solid var(--accent);
+  }
+  .pattern h3 {
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 700;
+    font-size: 1.08rem;
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pattern h3 .tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem;
+    font-weight: 500;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: .02em;
+  }
+  .pattern p { margin: 0 0 10px; color: var(--ink-soft); font-size: .95rem; max-width: 66ch; }
+  .pattern .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* ---------- Recommendations ---------- */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 680px) {
+    .rec-grid { grid-template-columns: 1fr; }
+  }
+  .rec-track {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+  .rec-track h3 {
+    font-family: "Gothic A1", sans-serif;
+    font-size: 1.02rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+  }
+  .rec-track .count {
+    font-size: .78rem;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+  }
+  .rec-item { padding: 14px 0; border-top: 1px solid var(--line); }
+  .rec-item:first-of-type { border-top: none; padding-top: 0; }
+  .rec-item .rt { font-weight: 700; font-size: .95rem; margin: 0 0 4px; }
+  .rec-item p { margin: 0; color: var(--ink-soft); font-size: .9rem; }
+
+  /* ---------- Appendix table ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; min-width: 760px; }
+  thead th {
+    text-align: left;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    background: var(--paper-raised);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+  }
+  tbody tr.group-head td {
+    background: var(--paper-raised-2);
+    font-weight: 700;
+    font-size: .82rem;
+    padding: 8px 14px;
+    color: var(--ink);
+  }
+  tbody tr:not(.group-head) td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-family: "IBM Plex Mono", monospace; color: var(--ink-soft); white-space: nowrap; }
+  td.title { color: var(--ink); }
+  td.ver { font-family: "IBM Plex Mono", monospace; font-size: .83rem; color: var(--ink-soft); white-space: nowrap; }
+  td.ver.muted { color: var(--line); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .76rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge.crit { background: var(--crit-soft); color: var(--crit); }
+  .badge.high { background: var(--high-soft); color: var(--high); }
+  .badge.med  { background: var(--med-soft);  color: var(--med); }
+  .badge.low  { background: var(--low-soft);  color: var(--low); }
+  .badge.open { background: var(--accent-soft); color: var(--accent-ink); }
+  .badge.closed { background: var(--paper-raised-2); color: var(--ink-soft); }
+
+  footer {
+    padding: 36px 0 64px;
+    font-size: .82rem;
+    color: var(--ink-soft);
+  }
+  footer p { max-width: 66ch; margin: 0 0 6px; }
+</style>
+
+
+
+<div class="wrap">
+
+  <header class="hero fade-in">
+    <div class="month-nav" id="mnDrop">
+      <div class="mn-trigger" onclick="mnToggle()">
+        <span class="mn-value">2026년 10월</span>
+        <svg class="mn-chevron" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0L4 5L8 0" fill="currentColor" style="color:var(--ink-soft)"/>
+        </svg>
+      </div>
+      <div class="mn-menu">
+        <div class="mn-option" onclick="location.href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/6a70f7ea7de7ef8ea62720c2313dffd5/raw/july-2026.html'">2026년 7월</div>
+        <div class="mn-option" onclick="location.href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/ef15c46dbccdd929df189cc0372e68cc/raw/august-2026.html'">2026년 8월</div>
+        <div class="mn-option" onclick="location.href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/1738cd8fc9aacd78268ce9ad6d7d52ee/raw/september-2026.html'">2026년 9월</div>
+        <div class="mn-option selected" onclick="location.href='https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/ab4c652c32880195bc2836ace5fcea0f/raw/october-2026.html'">2026년 10월</div>
+      </div>
+    </div>
+    <span class="eyebrow">shucle-ops-issues · 운영이슈 월간 리포트</span>
+    <h1>10월 운영이슈 27건, 전월 대비 절반 수준으로 감소</h1>
+    <p class="hero-sub">2026년 10월 한 달간 등록된 운영이슈 27건(#189~#216) 전체를 제품·심각도·해결 코멘트 기준으로 재분류했습니다.</p>
+    <div class="hero-meta">
+      <span>기간 <b>2026-10-01 ~ 10-31</b></span>
+      <span>대상 <b class="mono">#189 ~ #216</b></span>
+      <span>표본 <b>27건</b></span>
+      <span>분류 기준 <b>해결 코멘트 기반 근본원인</b></span>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi">
+        <div class="num">27<span>건</span></div>
+        <div class="label">전체 운영이슈</div>
+        <div class="sub">OPEN 3 · CLOSED 24</div>
+      </div>
+      <div class="kpi">
+        <div class="num">6<span>건</span></div>
+        <div class="label">앱 코드 결함</div>
+        <div class="sub">전체의 22% — 최대 비중</div>
+      </div>
+      <div class="kpi">
+        <div class="num">0<span></span></div>
+        <div class="label">Critical 발생</div>
+        <div class="sub">High 3건 모두 당일~2일 내 종결</div>
+      </div>
+      <div class="kpi">
+        <div class="num">4<span>건</span></div>
+        <div class="label">경기교통공사발 이슈</div>
+        <div class="sub">관제시스템 데이터·로직 결함에 집중 제보</div>
+      </div>
+    </div>
+  </header>
+
+  <section id="taxonomy">
+    <div class="section-head">
+      <span class="eyebrow">01 · 분류</span>
+      <h2>근본원인별 분류 — 27건</h2>
+      <p class="section-dek">9월과 동일한 11개 분류 체계를 적용했고, 이번 달은 실제로 9개 카테고리가 쓰였습니다. 앱 코드 결함(6건)과 CS·운영 서버요청성 수기 처리(4건)가 두 축을 이뤘습니다.</p>
+    </div>
+
+    <div class="tax-rows">
+      <div class="tax-row">
+        <div class="tax-name">앱 코드 결함</div>
+        <div class="tax-track"><div class="tax-fill" style="width:100%"></div></div>
+        <div class="tax-count"><b>6</b>건 · 22%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/193" target="_blank" rel="noopener">#193</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/197" target="_blank" rel="noopener">#197</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/205" target="_blank" rel="noopener">#205</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/206" target="_blank" rel="noopener">#206</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/207" target="_blank" rel="noopener">#207</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/213" target="_blank" rel="noopener">#213</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">정상 동작·이슈아님</div>
+        <div class="tax-track"><div class="tax-fill" style="width:67%"></div></div>
+        <div class="tax-count"><b>4</b>건 · 15%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/189" target="_blank" rel="noopener">#189</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/190" target="_blank" rel="noopener">#190</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/199" target="_blank" rel="noopener">#199</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/214" target="_blank" rel="noopener">#214</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">데이터 정합성</div>
+        <div class="tax-track"><div class="tax-fill" style="width:67%"></div></div>
+        <div class="tax-count"><b>4</b>건 · 15%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/194" target="_blank" rel="noopener">#194</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/198" target="_blank" rel="noopener">#198</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/200" target="_blank" rel="noopener">#200</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/208" target="_blank" rel="noopener">#208</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">CS·운영 서버요청</div>
+        <div class="tax-track"><div class="tax-fill" style="width:67%"></div></div>
+        <div class="tax-count"><b>4</b>건 · 15%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/195" target="_blank" rel="noopener">#195</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/210" target="_blank" rel="noopener">#210</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/211" target="_blank" rel="noopener">#211</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/212" target="_blank" rel="noopener">#212</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">백엔드·엔진 로직 결함</div>
+        <div class="tax-track"><div class="tax-fill" style="width:50%"></div></div>
+        <div class="tax-count"><b>3</b>건 · 11%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/196" target="_blank" rel="noopener">#196</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/203" target="_blank" rel="noopener">#203</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/204" target="_blank" rel="noopener">#204</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">기획·정책 개선필요</div>
+        <div class="tax-track"><div class="tax-fill" style="width:33%"></div></div>
+        <div class="tax-count"><b>2</b>건 · 7%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/201" target="_blank" rel="noopener">#201</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/209" target="_blank" rel="noopener">#209</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">재현불가·정보부족</div>
+        <div class="tax-track"><div class="tax-fill" style="width:33%"></div></div>
+        <div class="tax-count"><b>2</b>건 · 7%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/202" target="_blank" rel="noopener">#202</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/216" target="_blank" rel="noopener">#216</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">중복이슈</div>
+        <div class="tax-track"><div class="tax-fill" style="width:17%"></div></div>
+        <div class="tax-count"><b>1</b>건 · 4%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/192" target="_blank" rel="noopener">#192</a>
+        </div>
+      </div>
+      <div class="tax-row">
+        <div class="tax-name">운영자 실수</div>
+        <div class="tax-track"><div class="tax-fill" style="width:17%"></div></div>
+        <div class="tax-count"><b>1</b>건 · 4%</div>
+        <div class="tax-chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/215" target="_blank" rel="noopener">#215</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">핵심 요약</span>
+      <p>앱 코드 결함(6건)과 데이터 정합성(4건)을 합치면 10건(37%)이 구조적으로 고칠 수 있는 원인입니다. 반면 CS·운영 서버요청(4건)과 정상 동작·이슈아님(4건)을 합친 8건(30%)은 제품 결함이 아닌 CS·운영성 문의였습니다.</p>
+      <p>심각도는 Medium 13 · Low 8 · High 3 · 필드 누락 3건(#192, #193, #215)이며 Critical은 한 건도 없었습니다. hotfix 라벨이 붙은 5건(#197, #203, #205, #206, #207)도 모두 Medium 이하로, 발견 즉시 핫픽스 대응이 심각도 확산을 막은 것으로 보입니다.</p>
+    </div>
+  </section>
+
+  <section id="patterns">
+    <div class="section-head">
+      <span class="eyebrow">02 · 패턴</span>
+      <h2>이번 달 반복된 흐름</h2>
+      <p class="section-dek">개별 이슈를 날짜·제품·코멘트 순으로 따라가면, 서로 다른 제보가 같은 구조적 원인에서 반복됩니다.</p>
+    </div>
+
+    <div class="route">
+      <div class="pattern">
+        <h3>드라이버앱·비히클앱 핫픽스 3건이 한 주(10/14~10/19)에 몰렸다 <span class="tag">최다 발생</span></h3>
+        <p>비히클앱 정차 안내 음성 오동작(#205), 드라이버앱 정류장 자동스킵 미동작(#206), 대기장소 카드 미삭제(#207)가 모두 운수사 제보로 들어와 10/14~10/19 사이 연쇄적으로 핫픽스됐습니다. 세 건 모두 v4.13 배포 이후 운행 중 발견된 로직 결함이라는 공통점이 있습니다.</p>
+        <div class="chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/205" target="_blank" rel="noopener">#205</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/206" target="_blank" rel="noopener">#206</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/207" target="_blank" rel="noopener">#207</a>
+        </div>
+      </div>
+      <div class="pattern">
+        <h3>경기교통공사발 이슈 4건이 관제시스템 데이터·로직에 집중됐다 </h3>
+        <p>이천 2노선 휴차지 오설정(#200), 광역콜버스 좌석배정 로직 역전(#203), 평택 고덕 정류장 수정 불가(#209), 수원여객 좌석 승객수 오표기(#213)가 모두 경기교통공사 쪽에서 제보됐습니다. #203은 민원이 국민신문고까지 확산돼 긴급 핫픽스로 처리됐습니다.</p>
+        <div class="chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/200" target="_blank" rel="noopener">#200</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/203" target="_blank" rel="noopener">#203</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/209" target="_blank" rel="noopener">#209</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/213" target="_blank" rel="noopener">#213</a>
+        </div>
+      </div>
+      <div class="pattern">
+        <h3>정류장 데이터 벌크수정 작업이 휴먼에러로 재발했다 </h3>
+        <p>#198에서 9/11 이전 생성 정류장 51건의 공휴일 이용제한 설정을 벌크로 수정했는데, 이 수정 작업 중 공휴일에 입력해야 할 값을 요일별 항목에 입력하는 휴먼에러가 발생해 #215로 재차 제보됐습니다. 수동 벌크수정 작업 뒤 검증 단계가 빠진 전형적인 사례입니다.</p>
+        <div class="chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/198" target="_blank" rel="noopener">#198</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/215" target="_blank" rel="noopener">#215</a>
+        </div>
+      </div>
+      <div class="pattern">
+        <h3>CS 서버요청성 수기 처리가 4건 반복됐다 </h3>
+        <p>카드 정보 삭제(#195, #212), 로그인 세션 만료(#210), 장기 미반납 세션 만료(#211) 모두 개발팀이 DB를 직접 soft delete하는 방식으로 처리됐습니다. 네 건 모두 같은 패턴(회원 특정 → 수기 쿼리 → soft delete)을 반복하고 있습니다.</p>
+        <div class="chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/195" target="_blank" rel="noopener">#195</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/210" target="_blank" rel="noopener">#210</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/211" target="_blank" rel="noopener">#211</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/212" target="_blank" rel="noopener">#212</a>
+        </div>
+      </div>
+      <div class="pattern">
+        <h3>제품 결함이 아닌 "이슈아님" 종결이 4건 </h3>
+        <p>연결카드 변경 시점 오인(#189), 언어팩 재설치 엣지케이스(#190), 거주지 인증 만료 민원(#199), 접근성 설정으로 인한 UI 표시(#214) 모두 조사 결과 정상 동작으로 확인되어 종결됐습니다.</p>
+        <div class="chips">
+          <a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/189" target="_blank" rel="noopener">#189</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/190" target="_blank" rel="noopener">#190</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/199" target="_blank" rel="noopener">#199</a><a class="chip" href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/214" target="_blank" rel="noopener">#214</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="recommendations">
+    <div class="section-head">
+      <span class="eyebrow">03 · 제안</span>
+      <h2>QA·개발·운영·기획이 다음에 바꿀 것</h2>
+      <p class="section-dek">터지기 전에 잡는 쪽(QA), 재발을 막는 쪽(개발), 현장 프로세스를 다루는 쪽(운영), 정책을 설계하는 쪽(기획)으로 나눠서 정리했습니다.</p>
+    </div>
+
+    <div class="rec-grid">
+      <div class="rec-track">
+        <h3>QA 트랙</h3>
+        <p class="count">2개 제안</p>
+        <div class="rec-item">
+          <p class="rt">배포 직후 1주일, 운수사 현장 피드백 채널 집중 모니터링</p>
+          <p>v4.13 배포 이후 드라이버앱·비히클앱에서 운수사 제보로 핫픽스 3건(#205, #206, #207)이 10/14~10/19 한 주에 몰렸습니다. 정류장 자동스킵, 대기장소 처리처럼 운행 중에만 드러나는 로직은 실내 QA로 잡기 어려운 만큼, 배포 후 1주일은 운수사 제보 채널을 더 밀착 모니터링할 필요가 있습니다.</p>
+        </div>
+        <div class="rec-item">
+          <p class="rt">벌크 데이터 수정 작업에 after-check 체크리스트 도입</p>
+          <p>#198에서 정류장 51건을 벌크 수정했는데, 그 작업 자체의 실수가 #215로 재발했습니다. 벌크 수정 작업 후 샘플 검증(수정 전/후 값 비교) 단계를 QA 체크리스트에 추가하면 유사 재발을 막을 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="rec-track">
+        <h3>개발 트랙</h3>
+        <p class="count">2개 제안</p>
+        <div class="rec-item">
+          <p class="rt">좌석/배차 로직 변경 시 엣지케이스 사이드이펙트 점검</p>
+          <p>#203은 "불용 좌석 인접 회피" 규칙이 빈 좌석 설정과 맞물려 배차 순위가 역전되는 설계 결함이었고, #213은 이동 중 호출/출발 이벤트 타이밍 충돌로 좌석 인원이 리셋되는 문제였습니다. 둘 다 좌석·배차 관련 로직으로, 변경 시 동시성·엣지케이스 테스트를 강화할 필요가 있습니다.</p>
+        </div>
+        <div class="rec-item">
+          <p class="rt">삭제된 엔티티의 잔존 참조 정리</p>
+          <p>#208은 삭제된 운행유형(hidden 처리)이 권한에 남아있어 차고지 미설정 검증에 걸려 수정이 차단된 사례입니다. soft delete된 엔티티가 다른 테이블에서 계속 참조되는 구조적 문제로, 삭제 시 연관 데이터 정리 로직 점검이 필요합니다.</p>
+        </div>
+      </div>
+      <div class="rec-track">
+        <h3>운영 트랙</h3>
+        <p class="count">2개 제안</p>
+        <div class="rec-item">
+          <p class="rt">CS 수기 처리(soft delete) 반복 작업의 툴화</p>
+          <p>카드 삭제·세션 만료 요청 4건(#195, #210, #211, #212)이 모두 개발팀의 수기 DB 쿼리로 처리됐습니다. 반복되는 패턴인 만큼 운영툴에서 자체 처리 가능하도록 기능화하면 개발 리소스 소모를 줄일 수 있습니다.</p>
+        </div>
+        <div class="rec-item">
+          <p class="rt">데이터 마이그레이션 작업 시 운영 공지·검증 프로세스 정착</p>
+          <p>#200(차고지 매핑 마이그레이션), #198/#215(정류장 벌크수정)처럼 백오피스 데이터 작업 이후 현장에서 이상이 재제보되는 경우가 반복됩니다. 마이그레이션·벌크수정 작업 후 영향받는 운영사/지자체에 사전 공지하고 결과를 교차 검증하는 절차가 필요합니다.</p>
+        </div>
+      </div>
+      <div class="rec-track">
+        <h3>기획 트랙</h3>
+        <p class="count">2개 제안</p>
+        <div class="rec-item">
+          <p class="rt">운영사 권한 설계 시 누락 케이스 사전 검토</p>
+          <p>#201은 운영사 계정에 PLATFORM_MANAGE_ALL 권한이 빠져 관리자 메모 입력란이 보이지 않는 문제였습니다. 운영사 기획상 포함되어야 했던 권한이 누락된 것으로, 권한 매트릭스 설계 시 역할별 체크리스트 검토가 필요합니다. (11/10 배포 예정)</p>
+        </div>
+        <div class="rec-item">
+          <p class="rt">미사용 노선 삭제 기능 스펙화</p>
+          <p>#209에서 평택 미사용 노선을 삭제할 수 없어 정류장 수정까지 막히는 상황이 발생했고, 임시로 DB를 직접 soft delete해 해결했습니다. 운영툴에서 노선을 '미지정' 처리할 수 있는 기능이 장기 개선으로 요청된 상태라, 다음 마일스톤에 반영 검토가 필요합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="appendix">
+    <div class="section-head">
+      <span class="eyebrow">04 · 전체 목록</span>
+      <h2>이슈 27건 전수 — 근본원인별, 심각도순 정렬</h2>
+      <p class="section-dek">근본원인 분류로 그룹화하고, 각 그룹 안에서는 심각도(High → Medium → Low) 내림차순으로 정렬했습니다. 제품 열은 이슈 본문의 제품 필드를 기준으로 표기했습니다.</p>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>제목</th><th>제품</th><th>심각도</th><th>상태</th></tr>
+        </thead>
+        <tbody>
+          <tr class="group-head"><td colspan="5">앱 코드 결함 — 6건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/197" target="_blank" rel="noopener">#197</a></td><td class="title">4.14 피쳐 개발 사이드이펙트로 버튼 숨겨짐, 핫픽스 원복</td><td class="ver">관제시스템</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/205" target="_blank" rel="noopener">#205</a></td><td class="title">비히클앱 정차 안내 음성 오동작, v4.13.0.3 핫픽스</td><td class="ver">비히클앱</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/206" target="_blank" rel="noopener">#206</a></td><td class="title">정류장 자동스킵 조건 로직 결함, PR#904로 핫픽스</td><td class="ver">드라이버앱</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/207" target="_blank" rel="noopener">#207</a></td><td class="title">대기장소 도착 전 지연호출 시 카드 미삭제, PR#904/905 핫픽스</td><td class="ver">드라이버앱</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/213" target="_blank" rel="noopener">#213</a></td><td class="title">이동중 호출/출발 타이밍 이슈로 좌석 승객수 리셋, 4.14 반영(OPEN)</td><td class="ver">드라이버앱</td><td><span class="badge med">Medium</span></td><td><span class="badge open">Open</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/193" target="_blank" rel="noopener">#193</a></td><td class="title">다운로드-재생 서비스 간 레이스컨디션, v4.13.0.1 수정</td><td class="ver">비이클앱</td><td><span class="ver muted">—</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr class="group-head"><td colspan="5">정상 동작·이슈아님 — 4건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/214" target="_blank" rel="noopener">#214</a></td><td class="title">접근성 설정(테두리 보기)으로 인한 UI 표시, 정상 동작</td><td class="ver">라이더앱</td><td><span class="badge high">High</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/190" target="_blank" rel="noopener">#190</a></td><td class="title">언어팩 삭제 후 재설치하는 엣지케이스로 노운이슈 처리</td><td class="ver">라이더앱</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/189" target="_blank" rel="noopener">#189</a></td><td class="title">연결카드 변경 전 결제 건으로 혜택 미반영, 정상 동작 확인 후 종결</td><td class="ver">기타</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/199" target="_blank" rel="noopener">#199</a></td><td class="title">거주지 인증 만료 민원, 보호자 인증 확인되어 종결</td><td class="ver">기타</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr class="group-head"><td colspan="5">데이터 정합성 — 4건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/200" target="_blank" rel="noopener">#200</a></td><td class="title">노선 마이그레이션으로 휴차지 값 오염, 수동 재설정</td><td class="ver">관제시스템</td><td><span class="badge high">High</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/198" target="_blank" rel="noopener">#198</a></td><td class="title">9/11 이전 생성 정류장 51건 공휴일 설정 오염, 벌크 수정</td><td class="ver">맵에디터</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/194" target="_blank" rel="noopener">#194</a></td><td class="title">zone v2 전환 시 누락된 display_lnglat, 재수정으로 복구</td><td class="ver">맵에디터</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/208" target="_blank" rel="noopener">#208</a></td><td class="title">삭제된 운행유형에 차고지 미설정으로 수정 차단, 권한 정리</td><td class="ver">관제시스템</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr class="group-head"><td colspan="5">CS·운영 서버요청 — 4건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/195" target="_blank" rel="noopener">#195</a></td><td class="title">연령 미충족 회원 카드 연결 문제, 수기 카드 삭제 처리</td><td class="ver">기타</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/210" target="_blank" rel="noopener">#210</a></td><td class="title">로그인 세션 만료 수기 처리</td><td class="ver">기타</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/211" target="_blank" rel="noopener">#211</a></td><td class="title">장기 미반납 대여 세션 수기 만료 처리</td><td class="ver">기타</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/212" target="_blank" rel="noopener">#212</a></td><td class="title">간편가입 미완료 건 카드정보 수기 삭제</td><td class="ver">기타</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr class="group-head"><td colspan="5">백엔드·엔진 로직 결함 — 3건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/203" target="_blank" rel="noopener">#203</a></td><td class="title">불용석 인접회피 로직 설계결함, 민원 확산으로 핫픽스</td><td class="ver">관제시스템 (광역콜버스 좌석배정 로직)</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/204" target="_blank" rel="noopener">#204</a></td><td class="title">결제 타임아웃으로 대여 실패 후 상태 미전환, 수기 처리</td><td class="ver">라이더앱</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/196" target="_blank" rel="noopener">#196</a></td><td class="title">NULL 연산으로 지표 누락 (10+NULL=NULL), 신속 수정 완료</td><td class="ver">인사이트</td><td><span class="badge low">Low</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr class="group-head"><td colspan="5">기획·정책 개선필요 — 2건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/209" target="_blank" rel="noopener">#209</a></td><td class="title">미사용 노선 삭제 기능 부재, 수기 soft delete로 임시 해결</td><td class="ver">관제시스템, 맵에디터</td><td><span class="badge high">High</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/201" target="_blank" rel="noopener">#201</a></td><td class="title">운영사 권한에 관리자메모 노출 조건 누락, 4.14 반영 예정(OPEN)</td><td class="ver">관제시스템</td><td><span class="badge med">Medium</span></td><td><span class="badge open">Open</span></td></tr>
+          <tr class="group-head"><td colspan="5">재현불가·정보부족 — 2건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/202" target="_blank" rel="noopener">#202</a></td><td class="title">내비 유턴 안내 중 기사 임의 직진 추정, 명확한 결함 미확인</td><td class="ver">드라이버앱</td><td><span class="badge med">Medium</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/216" target="_blank" rel="noopener">#216</a></td><td class="title">네비 멈춤·재부팅 제보, 크래시 로그 미확인으로 원인불명(OPEN)</td><td class="ver">드라이버앱</td><td><span class="badge med">Medium</span></td><td><span class="badge open">Open</span></td></tr>
+          <tr class="group-head"><td colspan="5">중복이슈 — 1건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/192" target="_blank" rel="noopener">#192</a></td><td class="title">#193과 동일 현상 중복 등록, 필드 미기재</td><td class="ver">미분류</td><td><span class="ver muted">—</span></td><td><span class="badge closed">Closed</span></td></tr>
+          <tr class="group-head"><td colspan="5">운영자 실수 — 1건</td></tr>
+          <tr><td class="num"><a href="https://gitlab.hmc.co.kr/hkmc-airlab/shucle-ops-issues/-/work_items/215" target="_blank" rel="noopener">#215</a></td><td class="title">#198 일괄수정 시 공휴일값을 요일별에 입력하는 휴먼에러</td><td class="ver">미분류</td><td><span class="ver muted">—</span></td><td><span class="badge closed">Closed</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>데이터·방법</strong> — shucle-ops-issues 저장소에 2026년 10월 1일~31일 사이 등록된 ops-issue 27건(#189~#216)을 본문과 해결 코멘트 전체 전수 분석했습니다. #192, #193, #215는 심각도 필드가 비어 있어 라벨 값으로 보완했고, #192는 #193과 동일 현상의 중복 등록으로 분류했습니다.</p>
+    <p>작성  · 다음 갱신 시 OPEN 3건(#201, #213, #216)의 종료 여부 확인 필요.</p>
+  </footer>
+
+</div>
+
+<script>
+  function mnToggle() {
+    document.getElementById('mnDrop').classList.toggle('open');
+  }
+  document.addEventListener('click', e => {
+    const d = document.getElementById('mnDrop');
+    if (d && !d.contains(e.target)) d.classList.remove('open');
+  });
+</script>

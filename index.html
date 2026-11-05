@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>운영 이슈 월간 리포트 — Shucle Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #111110;
+      --surface: #1A1A18;
+      --border: #2A2A28;
+      --border-mid: #3A3A38;
+      --border-hover: #666663;
+      --text-primary: #F5F4F0;
+      --text-secondary: #888885;
+      --text-tertiary: #555553;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 560px;
+      padding: 0 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 6vw, 52px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--text-primary);
+    }
+
+    h1 .sub {
+      display: block;
+      color: var(--text-secondary);
+      font-weight: 400;
+      font-size: clamp(22px, 4vw, 36px);
+      letter-spacing: -0.02em;
+      margin-top: 4px;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 36px 0;
+    }
+
+    .selector-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+    }
+
+    .selector-row {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      width: 100%;
+    }
+
+    /* ── CUSTOM DROPDOWN ── */
+    .cs-wrap {
+      flex: 1;
+      position: relative;
+      user-select: none;
+    }
+
+    .cs-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-mid);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .cs-trigger:hover,
+    .cs-wrap.open .cs-trigger {
+      border-color: var(--border-hover);
+    }
+
+    .cs-value {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .cs-chevron {
+      flex-shrink: 0;
+      width: 10px;
+      height: 6px;
+      transition: transform 0.15s;
+    }
+
+    .cs-wrap.open .cs-chevron {
+      transform: rotate(180deg);
+    }
+
+    .cs-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0;
+      right: 0;
+      background: #222220;
+      border: 1px solid var(--border-mid);
+      z-index: 100;
+    }
+
+    .cs-wrap.open .cs-menu {
+      display: block;
+    }
+
+    .cs-option {
+      padding: 11px 14px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cs-option:last-child {
+      border-bottom: none;
+    }
+
+    .cs-option:hover {
+      background: #2A2A28;
+      color: var(--text-primary);
+    }
+
+    .cs-option.selected {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    /* ── GO BUTTON ── */
+    .go-btn {
+      background: var(--text-primary);
+      color: var(--bg);
+      border: none;
+      padding: 12px 24px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+
+    .go-btn:hover { opacity: 0.85; }
+
+    .footer-note {
+      margin-top: 48px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Shucle Platform · Ops Issues</div>
+    <h1>
+      운영 이슈
+      <span class="sub">월간 리포트</span>
+    </h1>
+
+    <div class="divider"></div>
+
+    <div class="selector-label">월 선택</div>
+    <div class="selector-row">
+      <div class="cs-wrap" id="mainDrop">
+        <div class="cs-trigger" onclick="toggleDrop('mainDrop')">
+          <span class="cs-value" id="mainDropValue">2026년 10월</span>
+          <svg class="cs-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0L5 6L10 0" fill="#888885"/>
+          </svg>
+        </div>
+        <div class="cs-menu">
+          <div class="cs-option"
+            data-url="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/6a70f7ea7de7ef8ea62720c2313dffd5/raw/july-2026.html"
+            onclick="selectOption('mainDrop', this)">2026년 7월</div>
+          <div class="cs-option"
+            data-url="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/ef15c46dbccdd929df189cc0372e68cc/raw/august-2026.html"
+            onclick="selectOption('mainDrop', this)">2026년 8월</div>
+          <div class="cs-option"
+            data-url="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/1738cd8fc9aacd78268ce9ad6d7d52ee/raw/september-2026.html"
+            onclick="selectOption('mainDrop', this)">2026년 9월</div>
+          <div class="cs-option selected"
+            data-url="https://htmlpreview.github.io/?https://gist.githubusercontent.com/yyc002/ab4c652c32880195bc2836ace5fcea0f/raw/october-2026.html"
+            onclick="selectOption('mainDrop', this)">2026년 10월</div>
+        </div>
+      </div>
+      <button class="go-btn" onclick="goTo()">열기</button>
+    </div>
+
+    <div class="footer-note">hkmc-airlab / shucle-ops-issues</div>
+  </div>
+
+  <script>
+    let selectedUrl = document.querySelector('#mainDrop .cs-option.selected').dataset.url;
+
+    function toggleDrop(id) {
+      document.getElementById(id).classList.toggle('open');
+    }
+
+    function selectOption(id, el) {
+      const wrap = document.getElementById(id);
+      wrap.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      document.getElementById(id + 'Value').textContent = el.textContent;
+      selectedUrl = el.dataset.url;
+      wrap.classList.remove('open');
+    }
+
+    function goTo() {
+      location.href = selectedUrl;
+    }
+
+    document.addEventListener('click', e => {
+      document.querySelectorAll('.cs-wrap.open').forEach(wrap => {
+        if (!wrap.contains(e.target)) wrap.classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>
