@@ -425,18 +425,13 @@
 
   <header class="hero fade-in">
     <div class="month-nav" id="mnDrop">
-      <div class="mn-trigger" onclick="mnToggle()">
-        <span class="mn-value">2026년 10월</span>
+      <div class="mn-trigger">
+        <span class="mn-value"></span>
         <svg class="mn-chevron" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M0 0L4 5L8 0" fill="currentColor" style="color:var(--ink-soft)"/>
         </svg>
       </div>
-      <div class="mn-menu">
-        <div class="mn-option" onclick="location.href='https://yyc002.github.io/ops-issues-dashboard/july-2026.html'">2026년 7월</div>
-        <div class="mn-option" onclick="location.href='https://yyc002.github.io/ops-issues-dashboard/august-2026.html'">2026년 8월</div>
-        <div class="mn-option" onclick="location.href='https://yyc002.github.io/ops-issues-dashboard/september-2026.html'">2026년 9월</div>
-        <div class="mn-option selected" onclick="location.href='https://yyc002.github.io/ops-issues-dashboard/october-2026.html'">2026년 10월</div>
-      </div>
+      <div class="mn-menu"></div>
     </div>
     <span class="eyebrow">shucle-ops-issues · 운영이슈 월간 리포트</span>
     <h1>10월 운영이슈 27건, 전월 대비 절반 수준으로 감소</h1>
@@ -727,12 +722,4 @@
 
 </div>
 
-<script>
-  function mnToggle() {
-    document.getElementById('mnDrop').classList.toggle('open');
-  }
-  document.addEventListener('click', e => {
-    const d = document.getElementById('mnDrop');
-    if (d && !d.contains(e.target)) d.classList.remove('open');
-  });
-</script>
+<script src="nav.js"></script>

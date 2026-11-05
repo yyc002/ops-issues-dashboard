@@ -205,58 +205,20 @@
     <div class="selector-label">월 선택</div>
     <div class="selector-row">
       <div class="cs-wrap" id="mainDrop">
-        <div class="cs-trigger" onclick="toggleDrop('mainDrop')">
-          <span class="cs-value" id="mainDropValue">2026년 10월</span>
+        <div class="cs-trigger">
+          <span class="cs-value" id="mainDropValue"></span>
           <svg class="cs-chevron" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 0L5 6L10 0" fill="#888885"/>
           </svg>
         </div>
-        <div class="cs-menu">
-          <div class="cs-option"
-            data-url="https://yyc002.github.io/ops-issues-dashboard/july-2026.html"
-            onclick="selectOption('mainDrop', this)">2026년 7월</div>
-          <div class="cs-option"
-            data-url="https://yyc002.github.io/ops-issues-dashboard/august-2026.html"
-            onclick="selectOption('mainDrop', this)">2026년 8월</div>
-          <div class="cs-option"
-            data-url="https://yyc002.github.io/ops-issues-dashboard/september-2026.html"
-            onclick="selectOption('mainDrop', this)">2026년 9월</div>
-          <div class="cs-option selected"
-            data-url="https://yyc002.github.io/ops-issues-dashboard/october-2026.html"
-            onclick="selectOption('mainDrop', this)">2026년 10월</div>
-        </div>
+        <div class="cs-menu"></div>
       </div>
-      <button class="go-btn" onclick="goTo()">열기</button>
+      <button class="go-btn" id="goBtn">열기</button>
     </div>
 
     <div class="footer-note">hkmc-airlab / shucle-ops-issues</div>
   </div>
 
-  <script>
-    let selectedUrl = document.querySelector('#mainDrop .cs-option.selected').dataset.url;
-
-    function toggleDrop(id) {
-      document.getElementById(id).classList.toggle('open');
-    }
-
-    function selectOption(id, el) {
-      const wrap = document.getElementById(id);
-      wrap.querySelectorAll('.cs-option').forEach(o => o.classList.remove('selected'));
-      el.classList.add('selected');
-      document.getElementById(id + 'Value').textContent = el.textContent;
-      selectedUrl = el.dataset.url;
-      wrap.classList.remove('open');
-    }
-
-    function goTo() {
-      location.href = selectedUrl;
-    }
-
-    document.addEventListener('click', e => {
-      document.querySelectorAll('.cs-wrap.open').forEach(wrap => {
-        if (!wrap.contains(e.target)) wrap.classList.remove('open');
-      });
-    });
-  </script>
+  <script src="nav.js"></script>
 </body>
 </html>
